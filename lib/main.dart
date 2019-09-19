@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,7 +23,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int numPeople = 0;
+  int numPeople = 2;
   final _node = FocusNode();
   final _controller = TextEditingController();
 
@@ -33,6 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _controller.addListener(_peopleListener);
     _node.addListener(_peopleListener);
+    _peopleListener();
   }
 
   void _peopleListener(){
@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       onPressed: (){
                         _node.unfocus();
-                        if(numPeople > 0){
+                        if(numPeople > 2){
                           numPeople -= 1;
                         } 
                         _peopleListener();
