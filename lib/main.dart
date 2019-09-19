@@ -32,6 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _controller.addListener(_peopleListener);
     _node.addListener(_peopleListener);
+    _peopleListener();
   }
 
   void _peopleListener(){
