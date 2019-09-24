@@ -6,7 +6,7 @@ class Person {
   int id;
   String name;
   double payment;
-  List<int> ordersId;
+  List<int> ordersId = new List();
 
   Person(id,name){
     this.id = id;
@@ -19,8 +19,15 @@ class Person {
 class Order {
   int id;
   String name;
-  int cost;
-  List<int> peopleId;
+  double cost;
+  List<int> peopleId = new List();
+
+  Order(id,name,cost,peopleId){
+    this.id = id;
+    this.name = name;
+    this.cost = cost;
+    this.peopleId = peopleId;
+  }
 }
 
 class PersonCard extends StatelessWidget{
@@ -68,26 +75,29 @@ class TableScreen extends StatefulWidget{
 }
 
 class _TableScreenState extends State<TableScreen>{
-  List<Person> people = new List();
+  List<Person> people;
   List<Order> orders = new List();
 
-  void initTable(){
-    for(int i = 0; i < widget.numPeople; i++){
-      Person person = new Person(i,"Person ${i + 1}");
-      people.add(person);
-    }
+  final foodNameController = new TextEditingController();
+  final foodCostController = new TextEditingController();
+
+  @override
+  void initState(){
+    super.initState();
+    people = List.generate(widget.numPeople, (int i) => new Person(i,"Person ${i + 1}"));
   }
 
   void addOrder(){
     showDialog(
       context: context,
       builder: (BuildContext context){
-        //String name = "Food Name";
-        //double cost = 1.00;
-        List<String> names = new List();
-        for(int i = 0; i < people.length; i++){
-          names.add(people[i].name);
-        }
+        //foodName = "Food Name";
+        double foodCost = 1.00;
+        foodCostController.addListener((){
+          foodCost = double.parse(foodCostController.value.text);
+        });
+        List names = people.map((x) => x.name).toList();
+        List peopleOrdering = people.map((x) => false).toList();
         return AlertDialog(
           title: Text("Add Order"),
           content: Container(
@@ -98,6 +108,7 @@ class _TableScreenState extends State<TableScreen>{
                 ),
                 Text("Enter cost:"),
                 TextField(
+                  controller: foodCostController,
                   keyboardType: TextInputType.number,
                 ),
                 Text("Who is getting this?"),
@@ -105,7 +116,7 @@ class _TableScreenState extends State<TableScreen>{
                   children: <Widget>[
                     CheckboxGroup(
                       labels: names,
-                      onSelected: (List<String> checked) => print(checked.toString())
+                      onChange: (bool isChecked, String label, int index) => peopleOrdering[index] = isChecked,
                     )
                   ],
                 ),
@@ -116,6 +127,7 @@ class _TableScreenState extends State<TableScreen>{
             FlatButton(
               child: Text("Enter"),
               onPressed: (){
+                createOrder("hello", foodCost, peopleOrdering);
                 Navigator.of(context).pop();
               },
             ),
@@ -131,18 +143,15 @@ class _TableScreenState extends State<TableScreen>{
     );
   }
 
-  @override
-  void initState(){
-    super.initState();
-    initTable();
+  void createOrder(name, cost, labels){
+    var peopleOrdering = List.generate(labels.length, (int i) => i).where((j) => labels[j]).toList();
+    Order order = Order(orders.length,name,cost,peopleOrdering);
+    peopleOrdering.map((i) => people[i].ordersId.add(orders.length));
+    orders.add(order);
   }
 
   List<Widget> peopleList(){
-    List<Widget> list = new List();
-    for(int i = 0; i < widget.numPeople; i++){
-      PersonCard item = PersonCard(people[i]);
-      list.add(item);
-    }
+    List<Widget> list = people.map((Person i) => new PersonCard(i)).toList();
     return list;
   }
 
