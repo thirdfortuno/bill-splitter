@@ -6,6 +6,7 @@ class Person {
   int id;
   String name;
   double payment;
+  double given = 0;
   List<int> ordersId = new List();
 
   Person(id,name){
@@ -33,15 +34,58 @@ class Order {
 class PersonCard extends StatelessWidget{
   PersonCard([
     this.person,
+    this.givenController,
   ]);
 
   final Person person;
+  final TextEditingController givenController;
+  
+  void editPerson(context){
+    showDialog(
+      context: context,
+      builder: (BuildContext context){
+        return(
+          AlertDialog(
+            title: Text("${person.name}"),
+            content: Container(
+              child: Column(
+                children: <Widget>[
+                  Text("Enter given money:"),
+                  TextField(
+                    controller: givenController,
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Enter"),
+                onPressed: (){
+                  person.given = double.parse(givenController.value.text);
+                  print(person.given);
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text("Cancel"),
+                onPressed: (){
+                  print("cancel");
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          )
+        );
+      }
+    );
+  }
 
   @override
   Widget build(BuildContext context){
     return(
       Card(
-        child: Container(
+        child: InkWell(
           child: Row(
             children: <Widget>[
               Container(),
@@ -55,8 +99,15 @@ class PersonCard extends StatelessWidget{
                   ),
                 ],
               ),
+              Spacer(),
+              Text("${person.given.toStringAsFixed(2)}"),
+              Spacer(),
+              Text("${(person.given-person.payment).toStringAsFixed(2)}"),
             ],
           ),
+          onTap:(){
+            editPerson(context);
+          }
         ),
       )
     );
@@ -80,11 +131,17 @@ class _TableScreenState extends State<TableScreen>{
 
   final foodNameController = new TextEditingController();
   final foodCostController = new TextEditingController();
+  final personGivenController = new TextEditingController();
+
+  double foodCost = 0;
 
   @override
   void initState(){
     super.initState();
     people = List.generate(widget.numPeople, (int i) => new Person(i,"Person ${i + 1}"));
+    foodCostController.addListener((){
+      foodCost = double.parse(foodCostController.value.text);
+    });
   }
 
   void addOrder(){
@@ -92,10 +149,6 @@ class _TableScreenState extends State<TableScreen>{
       context: context,
       builder: (BuildContext context){
         //foodName = "Food Name";
-        double foodCost = 1.00;
-        foodCostController.addListener((){
-          foodCost = double.parse(foodCostController.value.text);
-        });
         List names = people.map((x) => x.name).toList();
         List peopleOrdering = people.map((x) => false).toList();
         return AlertDialog(
@@ -116,7 +169,10 @@ class _TableScreenState extends State<TableScreen>{
                   children: <Widget>[
                     CheckboxGroup(
                       labels: names,
-                      onChange: (bool isChecked, String label, int index) => peopleOrdering[index] = isChecked,
+                      onChange: (bool isChecked, String label, int index){
+                        peopleOrdering[index] = isChecked;
+                        print(peopleOrdering);
+                        },
                     )
                   ],
                 ),
@@ -127,13 +183,16 @@ class _TableScreenState extends State<TableScreen>{
             FlatButton(
               child: Text("Enter"),
               onPressed: (){
+                print("Before: $peopleOrdering");
                 createOrder("hello", foodCost, peopleOrdering);
+                print("After: $peopleOrdering");
                 Navigator.of(context).pop();
               },
             ),
             FlatButton(
               child: Text("Cancel"),
               onPressed: (){
+                print("cancel");
                 Navigator.of(context).pop();
               },
             ),
@@ -146,18 +205,44 @@ class _TableScreenState extends State<TableScreen>{
   void createOrder(name, cost, labels){
     var peopleOrdering = List.generate(labels.length, (int i) => i).where((j) => labels[j]).toList();
     Order order = Order(orders.length,name,cost,peopleOrdering);
-    peopleOrdering.map((i) => people[i].ordersId.add(orders.length));
+    for (var i in peopleOrdering) people[i].ordersId.add(orders.length);
     orders.add(order);
+    computeCost();
+  }
+
+  void computeCost(){
+    //showOrderPeople();
+    //showPeopleOrder();
+    for (var person in people) person.payment = 0;
+    setState(() {
+      for (var order in orders){
+        var costEach = order.cost/order.peopleId.length;
+        print("$costEach = ${order.cost}/${order.peopleId.length}");
+        for (var id in order.peopleId) people[id].payment += costEach;
+      }
+    });
   }
 
   List<Widget> peopleList(){
-    List<Widget> list = people.map((Person i) => new PersonCard(i)).toList();
+    List<Widget> list = people.map((Person i) => new PersonCard(i,personGivenController)).toList();
     return list;
   }
 
   @override
   void dispose(){
     super.dispose();
+  }
+
+  void showPeopleOrder(){
+    for(int i = 0;i < people.length;i++){
+      print("${people[i].name}: ${people[i].ordersId}");
+    }
+  }
+
+  void showOrderPeople(){
+    for(int i = 0;i < orders.length;i++){
+      print("${orders[i].name}: ${orders[i].peopleId}");
+    }
   }
 
   @override
