@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bill_splitter/table_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -104,9 +105,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 SizedBox(height: 20),
                 InkWell(
-                  child: Text("Next Page"),
+                  child: SizedBox(
+                    height: 50,
+                    width: 100,
+                    child: Center(
+                      child: Text("Next Page"),
+                    )
+                  ),
                   onTap: (){
                     print("$numPeople");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TableScreen(numPeople: numPeople)
+                      ),
+                    );
                   },
                 )
               ],

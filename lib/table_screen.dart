@@ -156,9 +156,7 @@ class _TableScreenState extends State<TableScreen>{
           content: Container(
             child: Column(
               children: <Widget>[
-                Text("Enter name:"),
-                TextField(
-                ),
+                Text("Enter cost before selecting people"),
                 Text("Enter cost:"),
                 TextField(
                   controller: foodCostController,
@@ -183,16 +181,13 @@ class _TableScreenState extends State<TableScreen>{
             FlatButton(
               child: Text("Enter"),
               onPressed: (){
-                print("Before: $peopleOrdering");
                 createOrder("hello", foodCost, peopleOrdering);
-                print("After: $peopleOrdering");
                 Navigator.of(context).pop();
               },
             ),
             FlatButton(
               child: Text("Cancel"),
               onPressed: (){
-                print("cancel");
                 Navigator.of(context).pop();
               },
             ),
@@ -211,8 +206,6 @@ class _TableScreenState extends State<TableScreen>{
   }
 
   void computeCost(){
-    //showOrderPeople();
-    //showPeopleOrder();
     for (var person in people) person.payment = 0;
     setState(() {
       for (var order in orders){
@@ -233,18 +226,6 @@ class _TableScreenState extends State<TableScreen>{
     super.dispose();
   }
 
-  void showPeopleOrder(){
-    for(int i = 0;i < people.length;i++){
-      print("${people[i].name}: ${people[i].ordersId}");
-    }
-  }
-
-  void showOrderPeople(){
-    for(int i = 0;i < orders.length;i++){
-      print("${orders[i].name}: ${orders[i].peopleId}");
-    }
-  }
-
   @override
   Widget build(BuildContext context){
     return(
@@ -255,7 +236,9 @@ class _TableScreenState extends State<TableScreen>{
             InkWell(
               child: Container(
                 height: 100,
-                child: Text("Add Order"),
+                child: Center(
+                  child: Text("Add Order"),
+                )
               ),
               onTap: (){
                 addOrder();
