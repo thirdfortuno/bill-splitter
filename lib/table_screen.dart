@@ -100,9 +100,19 @@ class PersonCard extends StatelessWidget{
                 ],
               ),
               Spacer(),
-              Text("${person.given.toStringAsFixed(2)}"),
+              Column(
+                children: <Widget>[
+                  Text("Given money"),
+                  Text("${person.given.toStringAsFixed(2)}"),
+                ],
+              ),
               Spacer(),
-              Text("${(person.given-person.payment).toStringAsFixed(2)}"),
+              Column(
+                children: <Widget>[
+                  Text("Change"),
+                  Text("${(person.given-person.payment).toStringAsFixed(2)}"),
+                ],
+              ),
             ],
           ),
           onTap:(){
